@@ -9,6 +9,5 @@ createRoot(document.getElementById('root')!).render(
     <BudgetProvider>
       <App />
     </BudgetProvider>
-    <App />
-  </StrictMode>,
+  </StrictMode>
 )

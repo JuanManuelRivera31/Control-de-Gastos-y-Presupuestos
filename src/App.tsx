@@ -1,9 +1,15 @@
 import BudgetForm from "./components/BudgetForm"
-// import { useBudget } from "./hooks/useBudget"
+import { useMemo } from "react"
+import { useBudget } from "./hooks/useBudget"
+import BudgetTracker from "./components/BudgetTracker"
+import ExpenseModal from "./components/ExpenseModal"
 
 function App() {
 
   // const { state, dispatch } = useBudget()
+  const { state } = useBudget() //Recuperamos los datos del context por medio del state, Disptach si quiero escribir en el state
+
+  const isValidBudget = useMemo(() => state.budget > 0, [state.budget]) //Cada vez que cambie state.budget ejecuta funcion
 
   return (
     <>
@@ -14,8 +20,14 @@ function App() {
       </header>
 
       <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg mt-10 p-10">
-        <BudgetForm/>
+        {isValidBudget ? <BudgetTracker/> : <BudgetForm/>}
       </div>
+
+      {isValidBudget && ( //Ternario pero solo cuando se evalua como true la condicion
+        <main className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg mt-10 p-10">
+          <ExpenseModal/>
+        </main>        
+      )}
     </>
   )
 }
