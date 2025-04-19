@@ -10,6 +10,7 @@ import { formatDate } from "../helpers"
 import { Expense } from "../types"
 import AmountDisplay from "./AmountDisplay"
 import { categories } from "../data/categories"
+import { useBudget } from "../hooks/useBudget"
 import 'react-swipeable-list/dist/styles.css';
 
 type ExpenseDetaillProps = {
@@ -17,14 +18,15 @@ type ExpenseDetaillProps = {
 }
 
 export default function ExpenseDetaill({expense} : ExpenseDetaillProps) {
-  
+  const { dispatch } = useBudget() 
+
   //Filtramos sobre el arreglo de categorias y encontramos la coincidente
   const categoryInfo = useMemo(() => categories.filter(cat => cat.id === expense.category)[0], [expense]) //Cada que cambie
 
   const leadingActions = () => ( //Paretensis porque son components y quiero que se vean en pantalla
     <LeadingActions>
       <SwipeAction 
-        onClick={() => {}}
+        onClick={() => dispatch({type: 'get-expense-by-id', payload: { id: expense.id } })} 
       >
         Actualizar
       </SwipeAction>
@@ -34,7 +36,7 @@ export default function ExpenseDetaill({expense} : ExpenseDetaillProps) {
   const trailingActions = () => ( //Paretensis porque son components y quiero que se vean en pantalla
     <TrailingActions>
       <SwipeAction 
-        onClick={() => {}}
+        onClick={() => dispatch({ type: 'remove-expense', payload: { id: expense.id } })} 
         destructive={true}
       >
         Eliminar
@@ -45,7 +47,7 @@ export default function ExpenseDetaill({expense} : ExpenseDetaillProps) {
   return (
     <SwipeableList>
       <SwipeableListItem
-        maxSwipe={30} //Pixeles que quiero que se recorran para que se disparen actions
+        maxSwipe={1} //Pixeles que quiero que se recorran para que se disparen actions
         leadingActions={leadingActions()}
         trailingActions={trailingActions()}
       >

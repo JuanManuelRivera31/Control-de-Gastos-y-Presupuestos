@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import type { DraftExpense, Value } from "../types";
 import { categories } from "../data/categories";
 import DatePicker from "react-date-picker";
@@ -16,7 +16,15 @@ export default function ExpenseForm() {
   })
 
   const [error, setError] = useState('')
-  const { dispatch } = useBudget() 
+  const { dispatch, state } = useBudget() 
+
+  useEffect(() => {
+    if(state.editingId) {
+      const editingExpense = state.expenses.filter(currentExpense => currentExpense.id === state.editingId) //Quiero traerme el que sea igual al state que estoy presionando
+      [0]
+      setExpense(editingExpense) 
+    }
+  }, [state.editingId]) //Cuando cambie el editingId se va a ejecutar la funcion
 
   //Funcion aplica para el input y select
   const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
@@ -46,10 +54,12 @@ export default function ExpenseForm() {
       return
     }
 
-    //Agregar un nuevo gasto
-    dispatch({
-      type: 'add-expense', payload: {expense}})
-      
+    //Agregar o actualizar gasto
+    if(state.editingId){ 
+      dispatch({type: 'update-expense', payload: {expense: {id: state.editingId, ...expense}}}) //Cuando actualizamos requerimos el id
+    } else {
+      dispatch({type: 'add-expense', payload: {expense}})
+    }
 
     //Reiniciar el state
     setExpense({
@@ -66,7 +76,7 @@ export default function ExpenseForm() {
         <legend
           className="uppercase text-center text-2xl font-black 
           border-b-4 border-blue-500 py-2"
-        > Nuevo Gasto </legend>
+        > {state.editingId ? 'Actualizar Gasto' : 'Nuevo Gasto'} </legend>
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -82,7 +92,7 @@ export default function ExpenseForm() {
             placeholder="Añade el nombre del gasto"
             className="bg-slate-100 p-2"
             name="expenseName"
-            // value={expense.expenseName} //Conectamos el state con cada uno de los campos
+            value={expense.expenseName} //Conectamos el state con cada uno de los campos
             onChange={handleChange} //Conectamos el evento onChange con la funcion handleChange
           />
         </div>
@@ -98,7 +108,7 @@ export default function ExpenseForm() {
             placeholder="Añade la cantidad del gasto: ej. 300"
             className="bg-slate-100 p-2"
             name="amount"
-            // value={expense.amount}
+            value={expense.amount}
             onChange={handleChange} 
           />
         </div>
@@ -115,6 +125,7 @@ export default function ExpenseForm() {
             // placeholder="Añade la cantidad del gasto: ej. 300"
             className="bg-slate-100 p-2"
             name="category"
+            value={expense.category}
             onChange={handleChange}
             >
             <option value="">-- Seleccione --</option>
@@ -143,7 +154,7 @@ export default function ExpenseForm() {
         type="submit"
         className="bg-blue-600 cursor-pointer w-full p-2 text-white
         uppercase font-bold rounded-lg" 
-        value={'Registrar gasto'}/>
+        value={state.editingId ? 'Guardar Cambios' : 'Nuevo Gasto'}/>
 
 
     </form>

@@ -1,5 +1,5 @@
 import BudgetForm from "./components/BudgetForm"
-import { useMemo } from "react"
+import { useEffect, useMemo } from "react"
 import { useBudget } from "./hooks/useBudget"
 import BudgetTracker from "./components/BudgetTracker"
 import ExpenseModal from "./components/ExpenseModal"
@@ -12,6 +12,11 @@ function App() {
 
   const isValidBudget = useMemo(() => state.budget > 0, [state.budget]) //Cada vez que cambie state.budget ejecuta funcion
 
+  useEffect(() => {
+    localStorage.setItem('budget', state.budget.toString())
+    localStorage.setItem('expenses', JSON.stringify(state.expenses)) //Convertimos el arreglo a string
+  }, [state]) //Escuchamos aqui por todos los cambios en el state
+  
   return (
     <>
       <header className="bg-blue-600 py-8 max-h-72">
