@@ -1,33 +1,36 @@
 import { v4 as uuidv4 } from 'uuid'
-import { DraftExpense, Expense } from "../types"
+import { Category, DraftExpense, Expense } from "../types"
 
 export type BudgetActions =
-    {type: 'add-budget', payload: {budget: number} } |
-    {type: 'show-modal'} |
-    {type: 'close-modal'} |
-    {type: 'add-expense', payload: {expense: DraftExpense} } |
-    {type: 'remove-expense', payload: {id: Expense['id']} } |
-    {type: 'get-expense-by-id', payload: {id: Expense['id'] }} |
-    {type: 'update-expense', payload: {expense: Expense } }
-    
+    { type: 'add-budget', payload: { budget: number } } |
+    { type: 'show-modal' } |
+    { type: 'close-modal' } |
+    { type: 'add-expense', payload: { expense: DraftExpense } } |
+    { type: 'remove-expense', payload: { id: Expense['id'] } } |
+    { type: 'get-expense-by-id', payload: { id: Expense['id'] } } |
+    { type: 'update-expense', payload: { expense: Expense } } |
+    { type: 'restart-app' } |
+    { type: 'add-filter-category', payload: { id: Category['id'] } } 
+
 export type BudgetState = {
     budget: number
     modal: boolean
     expenses: Expense[]
     editingId: Expense['id']
+    currentCategory: Category['id']
 }
 
-const initialBudget = () : number => {
-    const localStorageBudget= localStorage.getItem('budget')
+const initialBudget = (): number => {
+    const localStorageBudget = localStorage.getItem('budget')
     return localStorageBudget ? +localStorageBudget : 0
 }
 
-const localStorageExpenses = () : Expense[] => {
+const localStorageExpenses = (): Expense[] => {
     const localStorageExpenses = localStorage.getItem('expenses')
     return localStorageExpenses ? JSON.parse(localStorageExpenses) : []
 }
 
-const createExpense = (DraftExpense: DraftExpense) : Expense => { //Recibe Draft sin ID-> Retorna Expense con ID
+const createExpense = (DraftExpense: DraftExpense): Expense => { //Recibe Draft sin ID-> Retorna Expense con ID
     return {
         ...DraftExpense,
         id: uuidv4()
@@ -38,74 +41,89 @@ export const initialState: BudgetState = {
     budget: initialBudget(),
     modal: false,
     expenses: localStorageExpenses(),
-    editingId: ''
+    editingId: '',
+    currentCategory: ''
 }
 
 export const budgetReducer = (
-    state: BudgetState= initialState,
+    state: BudgetState = initialState,
     action: BudgetActions
 ) => {
 
-    if(action.type === 'add-budget') {
+    if (action.type === 'add-budget') {
         return {
             ...state,
             budget: action.payload.budget
         }
     }
 
-    if(action.type === 'show-modal') { //Una vez que se presente el evento o la accion vamos a cambiar el modal
-        return{
+    if (action.type === 'show-modal') { //Una vez que se presente el evento o la accion vamos a cambiar el modal
+        return {
             ...state,
             modal: true
         }
     }
-    
-    if(action.type === 'close-modal') {
-        return{
+
+    if (action.type === 'close-modal') {
+        return {
             ...state,
             modal: false,
             editingId: ''
         }
     }
 
-    if(action.type === 'add-expense') {
+    if (action.type === 'add-expense') {
 
-         const expense = createExpense(action.payload.expense) //Toma desde el payload lo que está en el form, por ahora sin ID
+        const expense = createExpense(action.payload.expense) //Toma desde el payload lo que está en el form, por ahora sin ID
 
-        return{
+        return {
             ...state,
             expenses: [...state.expenses, expense],  //Ahora con ID
-            modal: false 
+            modal: false
         }
     }
 
-    if(action.type === 'remove-expense') {
-        return{
+    if (action.type === 'remove-expense') {
+        return {
             ...state,
-            expenses: state.expenses.filter( expense => expense.id !== action.payload.id) //Accedemos a cada gasto y trae los diferentes al payload dado
+            expenses: state.expenses.filter(expense => expense.id !== action.payload.id) //Accedemos a cada gasto y trae los diferentes al payload dado
         }
 
     }
 
-    if(action.type === 'get-expense-by-id'){
-        return{
+    if (action.type === 'get-expense-by-id') {
+        return {
             ...state,
             editingId: action.payload.id,
-            modal: true 
+            modal: true
         }
     }
 
-    if(action.type === 'update-expense') {
-        return{
+    if (action.type === 'update-expense') {
+        return {
             ...state,
-            expenses: state.expenses.map(expense => expense.id === action.payload.expense.id ? 
+            expenses: state.expenses.map(expense => expense.id === action.payload.expense.id ?
                 action.payload.expense :
                 expense
             ),
             modal: false,
             editingId: ''
         }
-        
+    }
+
+    if (action.type === 'restart-app') {
+        return {
+            ...state,
+            budget: 0,
+            expenses: [],     
+        }
+    }
+
+    if (action.type === 'add-filter-category') {
+        return {
+            ...state,
+            currentCategory: action.payload.id //Guardamos la categoria seleccionada en el state
+        }
     }
 
     return state

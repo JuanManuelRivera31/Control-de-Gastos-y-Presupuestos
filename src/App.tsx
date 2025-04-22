@@ -4,6 +4,7 @@ import { useBudget } from "./hooks/useBudget"
 import BudgetTracker from "./components/BudgetTracker"
 import ExpenseModal from "./components/ExpenseModal"
 import ExpenseList from "./components/ExpenseList"
+import FilterByCategory from "./components/FilterByCategory"
 
 function App() {
 
@@ -31,6 +32,7 @@ function App() {
 
       {isValidBudget && ( //Ternario pero solo cuando se evalua como true la condicion
         <main className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg mt-10 p-10">
+          <FilterByCategory/>
           <ExpenseList/>
           <ExpenseModal/>
         </main>        

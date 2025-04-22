@@ -8,6 +8,7 @@ import ErrorMessage from "./ErrorMessage";
 import { useBudget } from "../hooks/useBudget";
 
 export default function ExpenseForm() {
+  
   const [expense, setExpense] = useState<DraftExpense>({
     amount: 0,
     expenseName: '',
@@ -16,13 +17,15 @@ export default function ExpenseForm() {
   })
 
   const [error, setError] = useState('')
-  const { dispatch, state } = useBudget() 
+  const [previousAmount, setPreviousAmount] = useState(0)
+  const { dispatch, state, remainingBudget } = useBudget() 
 
   useEffect(() => {
     if(state.editingId) {
       const editingExpense = state.expenses.filter(currentExpense => currentExpense.id === state.editingId) //Quiero traerme el que sea igual al state que estoy presionando
       [0]
       setExpense(editingExpense) 
+      setPreviousAmount(editingExpense.amount) //Guardamos el valor anterior para comparar si se pasa del presupuesto
     }
   }, [state.editingId]) //Cuando cambie el editingId se va a ejecutar la funcion
 
@@ -35,7 +38,6 @@ export default function ExpenseForm() {
         [name]: isAmountField ? Number(value) : value //Si es amount convertimos el valor a number, si no lo dejamos como string
     })
   }
-
   
   const handleChangeDate = (value : Value) => {
     setExpense({
@@ -48,9 +50,15 @@ export default function ExpenseForm() {
   
     e.preventDefault(); //Evita que se recargue la pagina al enviar el formulario
 
-    //Validar
+    //Validar form
     if(Object.values(expense).includes('')) {
       setError('Todos los campos son obligatorios')
+      return
+    }
+
+    //Validar limite
+    if( (expense.amount - previousAmount) > remainingBudget) {
+      setError('Ese gasto se sale del presupuesto')
       return
     }
 
@@ -68,6 +76,7 @@ export default function ExpenseForm() {
       category: '',
       date: new Date(),
     })
+    setPreviousAmount(0)
   }
 
   return (
